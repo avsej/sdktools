@@ -39,5 +39,5 @@ node/build/Release/couchbase.node: node/.lock-wscript $(NODESOURCE)
 	(cd node; $(MAKE))
 
 clean:
-	repo forall -c 'git clean -dfx'
+	repo forall -c 'git clean -dfxq'
 	rm -rf install
