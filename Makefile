@@ -8,6 +8,8 @@ all: lcb/libcouchbase.la \
      php/modules/couchbase.so \
      node/build/Release/couchbase.node
 
+nodejs: node/build/Release/couchbase.node
+
 lcb/configure: lcb/configure.ac
 	(cd lcb; ./config/autorun.sh)
 
@@ -35,7 +37,9 @@ php/modules/couchbase.so: lcb/libcouchbase.la \
 node/.lock-wscript: node/wscript
 	(cd node; CPPFLAGS="-I$(PREFIX)/include" LDFLAGS="-L$(PREFIX)/lib -Wl,-rpath,$(PREFIX)/lib" node-waf configure)
 
-node/build/Release/couchbase.node: node/.lock-wscript $(NODESOURCE)
+node/build/Release/couchbase.node: lcb/libcouchbase.la\
+                                   node/.lock-wscript \
+                                   $(NODESOURCE)
 	(cd node; $(MAKE))
 
 clean:
