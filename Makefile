@@ -3,10 +3,12 @@ PREFIX := $(TOPDIR)/install
 LCBSOURCE := $(shell find lcb -name "*.[ch]*")
 PHPSOURCE := $(shell find php -name "*.[ch]*")
 NODESOURCE:= $(shell find node -name "*.[ch]*")
+RUBYCLIENTSOURCE:= $(shell find ruby/client -name "*.rb" -or -name "*.[ch]")
 
 all: lcb/libcouchbase.la \
      php/modules/couchbase.so \
-     node/build/Release/couchbase.node
+     node/build/Release/couchbase.node \
+     ruby
 
 nodejs: node/build/Release/couchbase.node
 
@@ -41,6 +43,24 @@ node/build/Release/couchbase.node: lcb/libcouchbase.la\
                                    node/.lock-wscript \
                                    $(NODESOURCE)
 	(cd node; $(MAKE))
+
+# To build ruby, you need ruby interpreter with rubygems and bundler gem
+# installed. To verify you have all these tools run these commands:
+#
+#   $ ruby --version || echo "missing ruby. http://ruby-lang.org"
+#   $ gem --version || echo "missing rubygems. http://rubygems.org"
+#   $ bundle --version || echo "missing gem bundler. http://gembundler.com"
+#
+# All these commands should printout their versions.
+ruby: ruby-client
+
+ruby-client: lcb/libcouchbase.la ruby/client/.timestamp
+
+ruby/client/.timestamp: ruby/client/Gemfile.lock $(RUBYCLIENTSOURCE)
+	(cd ruby/client; bundle exec rake compile && touch .timestamp)
+
+ruby/client/Gemfile.lock: ruby/client/Gemfile
+	(cd ruby/client; bundle install)
 
 clean:
 	repo forall -c 'git clean -dfxq'
