@@ -12,6 +12,8 @@ all: lcb/libcouchbase.la \
 
 nodejs: node/build/Release/couchbase.node
 
+libcouchbase: lcb/libcouchbase.la
+
 lcb/configure: lcb/configure.ac
 	(cd lcb; ./config/autorun.sh)
 
