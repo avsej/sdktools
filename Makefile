@@ -57,7 +57,7 @@ ruby: ruby-client
 ruby-client: lcb/libcouchbase.la ruby/client/.timestamp
 
 ruby/client/.timestamp: ruby/client/Gemfile.lock $(RUBYCLIENTSOURCE)
-	(cd ruby/client; bundle exec rake compile && touch .timestamp)
+	(cd ruby/client; bundle exec rake compile with_libcouchbase_dir=$(PREFIX) && touch .timestamp)
 
 ruby/client/Gemfile.lock: ruby/client/Gemfile
 	(cd ruby/client; bundle install)
