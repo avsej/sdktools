@@ -39,7 +39,7 @@ php/modules/couchbase.so: lcb/libcouchbase.la \
 	(cd php; $(MAKE))
 
 node/.lock-wscript: node/wscript
-	(cd node; CPPFLAGS="-I$(PREFIX)/include" LDFLAGS="-L$(PREFIX)/lib -Wl,-rpath,$(PREFIX)/lib" node-waf configure)
+	(cd node; CXXFLAGS="-Wall -pedantic -Wextra" CPPFLAGS="-I$(PREFIX)/include" LDFLAGS="-L$(PREFIX)/lib -Wl,-rpath,$(PREFIX)/lib" node-waf configure)
 
 node/build/Release/couchbase.node: lcb/libcouchbase.la\
                                    node/.lock-wscript \
