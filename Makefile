@@ -4,10 +4,12 @@ LCBSOURCE := $(shell find lcb -name "*.[ch]*")
 PHPSOURCE := $(shell find php -name "*.[ch]*")
 NODESOURCE:= $(shell find node -name "*.[ch]*")
 RUBYCLIENTSOURCE:= $(shell find ruby/client -name "*.rb" -or -name "*.[ch]")
+VACUUMSOURCE := $(shell find demo/vacuum -name "*.[ch]*")
 
 all: lcb/libcouchbase.la \
      php/modules/couchbase.so \
      node/build/Release/couchbase.node \
+     demo/vacuum/vacuum \
      ruby
 
 nodejs: node/build/Release/couchbase.node
@@ -63,6 +65,12 @@ ruby/client/.timestamp: ruby/client/Gemfile.lock $(RUBYCLIENTSOURCE)
 
 ruby/client/Gemfile.lock: ruby/client/Gemfile
 	(cd ruby/client; bundle install)
+
+#
+# Demo programs
+#
+demo/vacuum/vacuum: lcb/libcouchbase.la $(VACUUM_SRC)
+	(cd demo/vacuum; $(MAKE) CPPFLAGS="-I$(PREFIX)/include" LDFLAGS="-L$(PREFIX)/lib -Wl,-rpath,$(PREFIX)/lib")
 
 clean:
 	repo forall -c 'git clean -dfxq'
