@@ -14,6 +14,8 @@ all: lcb/libcouchbase.la \
 
 nodejs: node/build/Release/couchbase.node
 
+php: php/modules/couchbase.so
+
 libcouchbase: lcb/libcouchbase.la
 
 lcb/configure: lcb/configure.ac
