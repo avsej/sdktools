@@ -5,6 +5,8 @@ PHPSOURCE := $(shell find php -name "*.[ch]*")
 NODESOURCE:= $(shell find node -name "*.[ch]*")
 RUBYCLIENTSOURCE:= $(shell find ruby/client -name "*.rb" -or -name "*.[ch]")
 VACUUMSOURCE := $(shell find demo/vacuum -name "*.[ch]*")
+PLUGINLESSSTEP1SOURCE := $(shell find demo/pluginless/step1 -name "*.[ch]*")
+PLUGINLESSSTEP2SOURCE := $(shell find demo/pluginless/step2 -name "*.[ch]*")
 
 all: lcb/libcouchbase.la \
      php/modules/couchbase.so \
@@ -71,8 +73,28 @@ ruby/client/Gemfile.lock: ruby/client/Gemfile
 #
 # Demo programs
 #
-demo/vacuum/vacuum: lcb/libcouchbase.la $(VACUUM_SRC)
-	(cd demo/vacuum; $(MAKE) CPPFLAGS="-I$(PREFIX)/include" LDFLAGS="-L$(PREFIX)/lib -Wl,-rpath,$(PREFIX)/lib")
+demo/vacuum/vacuum: lcb/libcouchbase.la $(VACUUMSOURCE)
+	(cd demo/vacuum; $(MAKE) CPPFLAGS="-i$(PREFIX)/include" LDFLAGS="-l$(PREFIX)/lib -wl,-rpath,$(PREFIX)/lib")
+
+demo/pluginless: demo/pluginless/step1/server demo/pluginless/step2/server
+
+demo/pluginless/step1/configure: demo/pluginless/step1/configure.ac
+	(cd demo/pluginless/step1; ./autogen.sh)
+
+demo/pluginless/step1/Makefile: demo/pluginless/step1/configure demo/pluginless/step1/Makefile.am
+	(cd demo/pluginless/step1; ./configure --prefix=$(PREFIX))
+
+demo/pluginless/step1/server: demo/pluginless/step1/Makefile $(PLUGINLESSSTEP1SOURCE)
+	(cd demo/pluginless/step1; $(MAKE))
+
+demo/pluginless/step2/configure: lcb/libcouchbase.la demo/pluginless/step2/configure.ac
+	(cd demo/pluginless/step2; ./autogen.sh)
+
+demo/pluginless/step2/Makefile: demo/pluginless/step2/configure demo/pluginless/step2/Makefile.am
+	(cd demo/pluginless/step2; ./configure --prefix=$(PREFIX))
+
+demo/pluginless/step2/server: demo/pluginless/step2/Makefile $(PLUGINLESSSTEP2SOURCE)
+	(cd demo/pluginless/step2; $(MAKE))
 
 clean:
 	repo forall -c 'git clean -dfxq'
