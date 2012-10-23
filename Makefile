@@ -44,7 +44,10 @@ php/modules/couchbase.so: lcb/libcouchbase.la \
                           $(PHPSOURCE)
 	(cd php; $(MAKE))
 
-node/.lock-wscript: node/wscript
+node/tests/config.json: tools/config.json
+	cp tools/config.json node/tests/config.json
+
+node/.lock-wscript: node/wscript node/tests/config.json
 	(cd node; CXXFLAGS="-Wall -pedantic -Wextra" CPPFLAGS="-I$(PREFIX)/include" LDFLAGS="-L$(PREFIX)/lib -Wl,-rpath,$(PREFIX)/lib" node-waf configure)
 
 node/build/Release/couchbase.node: lcb/libcouchbase.la\

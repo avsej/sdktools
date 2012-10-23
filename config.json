@@ -1,0 +1,6 @@
+{
+    "hosts" : [ "localhost:9000" ],
+    "bucket" : "default",
+    "password" : "",
+    "user" : ""
+}
