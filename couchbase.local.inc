@@ -4,6 +4,6 @@
   settings to match your development environment
 */
 define("COUCHBASE_CONFIG_HOST", "127.0.0.1:9000");
-define("COUCHBASE_CONFIG_USER", "Administrator");
-define("COUCHBASE_CONFIG_PASSWD", "asdasd");
+define("COUCHBASE_CONFIG_USER", "");
+define("COUCHBASE_CONFIG_PASSWD", "");
 define("COUCHBASE_CONFIG_BUCKET", "default");
