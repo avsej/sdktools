@@ -74,7 +74,7 @@ ruby/client/Gemfile.lock: ruby/client/Gemfile
 # Demo programs
 #
 demo/vacuum/vacuum: lcb/libcouchbase.la $(VACUUMSOURCE)
-	(cd demo/vacuum; $(MAKE) CPPFLAGS="-i$(PREFIX)/include" LDFLAGS="-l$(PREFIX)/lib -wl,-rpath,$(PREFIX)/lib")
+	(cd demo/vacuum; $(MAKE) CPPFLAGS="-I$(PREFIX)/include" LDFLAGS="-L$(PREFIX)/lib -wl,-rpath,$(PREFIX)/lib")
 
 demo/pluginless: demo/pluginless/step1/server demo/pluginless/step2/server
 
