@@ -78,7 +78,7 @@ ruby/client/Gemfile.lock: ruby/client/Gemfile
 # nginx server with couchbase module
 nginx-module: nginx/objs/nginx
 
-nginx/objs/nginx: nginx/objs/Makefile $(NGINXSOURCE) $(NGINXMODULESOURCE)
+nginx/objs/nginx: lcb/libcouchbase.la nginx/objs/Makefile $(NGINXSOURCE) $(NGINXMODULESOURCE)
 	(cd nginx; $(MAKE) install)
 
 nginx/objs/Makefile: nginx/auto/configure nginx-module/config
