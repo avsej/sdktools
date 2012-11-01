@@ -7,6 +7,8 @@ RUBYCLIENTSOURCE:= $(shell find ruby/client -name "*.rb" -or -name "*.[ch]")
 VACUUMSOURCE := $(shell find demo/vacuum -name "*.[ch]*")
 PLUGINLESSSTEP1SOURCE := $(shell find demo/pluginless/step1 -name "*.[ch]*")
 PLUGINLESSSTEP2SOURCE := $(shell find demo/pluginless/step2 -name "*.[ch]*")
+NGINXSOURCE := $(shell find nginx -name "*.[ch]*")
+NGINXMODULESOURCE := $(shell find nginx-module -name "*.[ch]*")
 
 all: lcb/libcouchbase.la \
      php/modules/couchbase.so \
@@ -72,6 +74,15 @@ ruby/client/.timestamp: ruby/client/Gemfile.lock $(RUBYCLIENTSOURCE)
 
 ruby/client/Gemfile.lock: ruby/client/Gemfile
 	(cd ruby/client; bundle install)
+
+# nginx server with couchbase module
+nginx-module: nginx/objs/nginx
+
+nginx/objs/nginx: nginx/objs/Makefile $(NGINXSOURCE) $(NGINXMODULESOURCE)
+	(cd nginx; $(MAKE) install)
+
+nginx/objs/Makefile: nginx/auto/configure nginx-module/config
+	(cd nginx; ./auto/configure --prefix=$(PREFIX) --with-debug --add-module=$(TOPDIR)/nginx-module)
 
 #
 # Demo programs
