@@ -46,16 +46,29 @@ php/modules/couchbase.so: lcb/libcouchbase.la \
                           $(PHPSOURCE)
 	(cd php; $(MAKE))
 
+#
+# To build node you need node-gyp. Install with: npm install -g node-gyp
+#
+NODE_CPPFLAGS=-I$(PREFIX)/include
+NODE_LDFLAGS=-L$(PREFIX)/lib -Wl,-rpath,$(PREFIX)/lib
+NODE_CXXFLAGS=-Wall -pedantic -Wextra
 node/tests/config.json: tools/config.json
 	cp tools/config.json node/tests/config.json
 
-node/.lock-wscript: node/wscript node/tests/config.json
-	(cd node; CXXFLAGS="-Wall -pedantic -Wextra" CPPFLAGS="-I$(PREFIX)/include" LDFLAGS="-L$(PREFIX)/lib -Wl,-rpath,$(PREFIX)/lib" node-waf configure)
+node/node_modules: node/package.json
+	(cd node; EXTRA_CPPFLAGS="$(NODE_CPPFLAGS)" \
+                  EXTRA_LDFLAGS="$(NODE_LDFLAGS)" \
+                  EXTRA_CXXFLAGS="$(NODE_CXXFLAGS)" npm install)
 
 node/build/Release/couchbase.node: lcb/libcouchbase.la\
-                                   node/.lock-wscript \
+                                   node/tests/config.json \
+                                   node/binding.gyp \
+                                   node/node_modules \
                                    $(NODESOURCE)
-	(cd node; $(MAKE))
+	(cd node; $(MAKE) \
+                   EXTRA_CPPFLAGS="$(NODE_CPPFLAGS)" \
+                   EXTRA_LDFLAGS="$(NODE_LDFLAGS)" \
+                   EXTRA_CXXFLAGS="$(NODE_CXXFLAGS)" all)
 
 # To build ruby, you need ruby interpreter with rubygems and bundler gem
 # installed. To verify you have all these tools run these commands:
