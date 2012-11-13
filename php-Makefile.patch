@@ -1,0 +1,20 @@
+--- Makefile	2012-11-13 16:34:16.391600655 +0300
++++ Makefile.good	2012-11-13 16:39:18.590788313 +0300
+@@ -131,7 +131,7 @@
+ PHP_DEPRECATED_DIRECTIVES_REGEX = '^(magic_quotes_(gpc|runtime|sybase)?|(zend_)?extension(_debug)?(_ts)?)[\t\ ]*='
+ 
+ test: all
+-	-@if test ! -z "$(PHP_EXECUTABLE)" && test -x "$(PHP_EXECUTABLE)"; then \
++	@if test ! -z "$(PHP_EXECUTABLE)" && test -x "$(PHP_EXECUTABLE)"; then \
+ 		INI_FILE=`$(PHP_EXECUTABLE) -d 'display_errors=stderr' -r 'echo php_ini_loaded_file();' 2> /dev/null`; \
+ 		if test "$$INI_FILE"; then \
+ 			$(EGREP) -h -v $(PHP_DEPRECATED_DIRECTIVES_REGEX) "$$INI_FILE" > $(top_builddir)/tmp-php.ini; \
+@@ -146,7 +146,7 @@
+ 		TEST_PHP_EXECUTABLE=$(PHP_EXECUTABLE) \
+ 		TEST_PHP_SRCDIR=$(top_srcdir) \
+ 		CC="$(CC)" \
+-			$(PHP_EXECUTABLE) -n -c $(top_builddir)/tmp-php.ini $(PHP_TEST_SETTINGS) $(top_srcdir)/run-tests.php -n -c $(top_builddir)/tmp-php.ini -d extension_dir=$(top_builddir)/modules/ $(PHP_TEST_SHARED_EXTENSIONS) $(TESTS); \
++			$(PHP_EXECUTABLE) -n -c $(top_builddir)/tmp-php.ini $(PHP_TEST_SETTINGS) $(top_srcdir)/run-tests.php -n -c $(top_builddir)/tmp-php.ini -d extension_dir=$(top_builddir)/modules/ $(PHP_TEST_SHARED_EXTENSIONS) $(TESTS) && \
+ 		rm $(top_builddir)/tmp-php.ini; \
+ 	else \
+ 		echo "ERROR: Cannot run tests without CLI sapi."; \
