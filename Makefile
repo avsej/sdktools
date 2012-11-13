@@ -50,7 +50,7 @@ php-test: php/modules/couchbase.so
 	(cd php; NO_INTERACTION=1 REPORT_EXIT_STATUS=1 $(MAKE) test)
 
 php-dist: php/modules/couchbase.so
-	(cd php; ./package/make-package.sh)
+	(cd php; ./package/make-package.sh $(PREFIX))
 
 #
 # To build node you need node-gyp. Install with: npm install -g node-gyp
