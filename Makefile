@@ -46,6 +46,12 @@ php/modules/couchbase.so: lcb/libcouchbase.la \
                           $(PHPSOURCE)
 	(cd php; $(MAKE))
 
+php-test: php/modules/couchbase.so
+	(cd php; $(MAKE) test)
+
+php-dist: php/modules/couchbase.so
+	(cd php; ./package/make-package.sh)
+
 #
 # To build node you need node-gyp. Install with: npm install -g node-gyp
 #
