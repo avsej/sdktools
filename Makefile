@@ -35,7 +35,7 @@ php/configure: php/config.m4
 	(cd php; phpize)
 
 php/Makefile: php/configure
-	(cd php; ./configure --with-couchbase=$(PREFIX); patch < ../tools/php-Makefile.patch)
+	(cd php; ./configure --with-couchbase=$(PREFIX) && ed Makefile < ../tools/php-Makefile.ed)
 
 php/tests/couchbase.local.inc: tools/couchbase.local.inc
 	cp tools/couchbase.local.inc php/tests/couchbase.local.inc
