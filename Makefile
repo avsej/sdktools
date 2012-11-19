@@ -7,8 +7,8 @@ RUBYCLIENTSOURCE:= $(shell find ruby/client -name "*.rb" -o -name "*.[ch]")
 VACUUMSOURCE := $(shell find demo/vacuum -name "*.[ch]*")
 PLUGINLESSSTEP1SOURCE := $(shell find demo/pluginless/step1 -name "*.[ch]*")
 PLUGINLESSSTEP2SOURCE := $(shell find demo/pluginless/step2 -name "*.[ch]*")
-NGINXSOURCE := $(shell find nginx -name "*.[ch]*")
-NGINXMODULESOURCE := $(shell find nginx-module -name "*.[ch]*")
+#NGINXSOURCE := $(shell find nginx -name "*.[ch]*")
+#NGINXMODULESOURCE := $(shell find nginx-module -name "*.[ch]*")
 
 all: lcb/libcouchbase.la \
      php/modules/couchbase.so \
