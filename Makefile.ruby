@@ -15,14 +15,13 @@ RUBIES:= \
 
 all: check
 
-install-rubies:$(RBENVDIR)/.bundler-done
+install-rubies:$(RBENVDIR)/.gems-done
 
-check: libcouchbase $(RBENVDIR)/.bundler-done client.bundled
+check: libcouchbase $(RBENVDIR)/.gems-done install-deps
 	(cd client; rbenv each -v bundle exec rake clean compile with_libcouchbase_dir=$(PREFIX) test)
 
-client.bundled: client/Gemfile
+install-deps: client/Gemfile
 	(cd client; rbenv each -v bundle install --no-color)
-	touch $@
 
 libcouchbase: libcouchbase/libcouchbase.la
 	(cd libcouchbase; $(MAKE) install)
@@ -36,7 +35,8 @@ libcouchbase/Makefile: libcouchbase/configure
 libcouchbase/configure: libcouchbase/configure.ac
 	(cd libcouchbase; ./config/autorun.sh)
 
-$(RBENVDIR)/.bundler-done: $(RUBIES)
+$(RBENVDIR)/.gems-done: $(RUBIES)
+	rbenv each -v gem install rake -v 0.8.7
 	rbenv each -v gem install bundler
 	rbenv rehash
 	touch $@
@@ -61,4 +61,4 @@ $(RBENVDIR)/.done:
 	git clone git://github.com/sstephenson/rbenv.git $(RBENVDIR)
 	touch $@
 
-.PHONY: all check install-rubies
+.PHONY: all check install-rubies install-deps
