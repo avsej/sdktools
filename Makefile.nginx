@@ -1,0 +1,33 @@
+TOPDIR := $(shell pwd)
+PREFIX := $(TOPDIR)/install
+LCBSOURCE := $(shell find libcouchbase -name "*.[ch]*")
+NGINXSOURCE := $(shell find nginx -name "*.[ch]*")
+NGINXMODULESOURCE := $(shell find module -name "*.[ch]*")
+
+all: $(PREFIX)/sbin/nginx
+
+libcouchbase: $(PREFIX)/lib/libcouchbase.la
+
+$(PREFIX)/lib/libcouchbase.la: libcouchbase/libcouchbase.la
+	(cd libcouchbase; $(MAKE) install)
+
+libcouchbase/libcouchbase.la: libcouchbase/Makefile $(LCBSOURCE)
+	(cd libcouchbase; $(MAKE))
+
+libcouchbase/Makefile: libcouchbase/configure
+	(cd libcouchbase; ./configure --prefix=$(PREFIX) --enable-werror --enable-warnings --enable-debug)
+
+libcouchbase/configure: libcouchbase/configure.ac
+	(cd libcouchbase; ./config/autorun.sh)
+
+$(PREFIX)/sbin/nginx: nginx/objs/nginx
+	(cd nginx; $(MAKE) install)
+
+nginx/objs/nginx: $(PREFIX)/lib/libcouchbase.la nginx/objs/Makefile $(NGINXSOURCE) $(NGINXMODULESOURCE)
+	(cd nginx; $(MAKE))
+
+nginx/objs/Makefile: nginx/auto/configure module/config
+	(cd nginx; ./auto/configure --prefix=$(PREFIX) --with-debug --add-module=$(TOPDIR)/module)
+
+check: $(PREFIX)/sbin/nginx
+	(cd module; PATH=$(PREFIX)/sbin:$(PATH) prove)
