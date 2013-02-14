@@ -24,7 +24,9 @@ client.bundled: client/Gemfile
 	(cd client; rbenv each -v bundle install --no-color)
 	touch $@
 
-libcouchbase: libcouchbase/libcouchbase.la
+libcouchbase: $(PREFIX)/lib/libcouchbase.so
+
+$(PREFIX)/lib/libcouchbase.so: libcouchbase/libcouchbase.la
 	(cd libcouchbase; $(MAKE) install)
 
 libcouchbase/libcouchbase.la: libcouchbase/Makefile $(LCBSOURCE)
@@ -61,4 +63,14 @@ $(RBENVDIR)/.done:
 	git clone git://github.com/sstephenson/rbenv.git $(RBENVDIR)
 	touch $@
 
-.PHONY: all check install-rubies
+clean:
+	repo forall -c 'git clean -dfxq'
+	rm -rf install
+
+client/lib/couchbase_ext.so: client.bundled $(RUBYSOURCE) $(PREFIX)/lib/libcouchbase.so
+	(cd client; bundle exec rake compile with_libcouchbase_dir=$(PREFIX))
+
+console: client/lib/couchbase_ext.so
+	(cd client; bundle exec rake console)
+
+.PHONY: all check install-rubies clean console
