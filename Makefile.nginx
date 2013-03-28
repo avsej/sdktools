@@ -4,6 +4,9 @@ LCBSOURCE := $(shell find libcouchbase -name "*.[ch]*")
 NGINXSOURCE := $(shell find nginx -name "*.[ch]*")
 NGINXMODULESOURCE := $(shell find module -name "*.[ch]*")
 
+CPPFLAGS = -O0 -ggdb3
+CFLAGS = ${CPPFLAGS}
+
 all: $(PREFIX)/sbin/nginx
 
 libcouchbase: $(PREFIX)/lib/libcouchbase.la
@@ -24,10 +27,12 @@ $(PREFIX)/sbin/nginx: nginx/objs/nginx
 	(cd nginx; $(MAKE) install)
 
 nginx/objs/nginx: $(PREFIX)/lib/libcouchbase.la nginx/objs/Makefile $(NGINXSOURCE) $(NGINXMODULESOURCE)
-	(cd nginx; $(MAKE))
+	(cd nginx; CPPFLAGS="${CPPFLAGS}" CFLAGS="${CFLAGS}" $(MAKE))
 
 nginx/objs/Makefile: nginx/auto/configure module/config
-	(cd nginx; ./auto/configure --prefix=$(PREFIX) --with-debug --add-module=$(TOPDIR)/module)
+	(cd nginx; CPPFLAGS="$(CPPFLAGS)" CFLAGS="$(CFLAGS)" \
+		LIBCOUCHBASE_INCLUDE="$(PREFIX)/include" LIBCOUCHBASE_LIB="$(PREFIX)/lib" \
+		./auto/configure --prefix=$(PREFIX) --with-debug --add-module=$(TOPDIR)/module)
 
 check: $(PREFIX)/sbin/nginx
 	(cd module; PATH=$(PREFIX)/sbin:$(PATH) prove)
