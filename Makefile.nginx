@@ -5,7 +5,7 @@ NGINXSOURCE := $(shell find nginx -name "*.[ch]*")
 NGINXMODULESOURCE := $(shell find module -name "*.[ch]*")
 
 CPPFLAGS = -O0 -ggdb3
-CFLAGS = ${CPPFLAGS}
+CFLAGS = ${CPPFLAGS} -Wall -Wextra
 
 all: $(PREFIX)/sbin/nginx
 
@@ -18,7 +18,7 @@ libcouchbase/libcouchbase.la: libcouchbase/Makefile $(LCBSOURCE)
 	(cd libcouchbase; $(MAKE))
 
 libcouchbase/Makefile: libcouchbase/configure
-	(cd libcouchbase; ./configure --prefix=$(PREFIX) --enable-werror --enable-warnings --enable-debug)
+	(cd libcouchbase; ./configure --prefix=$(PREFIX) --enable-werror --enable-warnings --enable-debug --disable-plugins)
 
 libcouchbase/configure: libcouchbase/configure.ac
 	(cd libcouchbase; ./config/autorun.sh)
@@ -29,10 +29,27 @@ $(PREFIX)/sbin/nginx: nginx/objs/nginx
 nginx/objs/nginx: $(PREFIX)/lib/libcouchbase.la nginx/objs/Makefile $(NGINXSOURCE) $(NGINXMODULESOURCE)
 	(cd nginx; CPPFLAGS="${CPPFLAGS}" CFLAGS="${CFLAGS}" $(MAKE))
 
-nginx/objs/Makefile: nginx/auto/configure module/config
+nginx/objs/Makefile: nginx/configure module/config
 	(cd nginx; CPPFLAGS="$(CPPFLAGS)" CFLAGS="$(CFLAGS)" \
 		LIBCOUCHBASE_INCLUDE="$(PREFIX)/include" LIBCOUCHBASE_LIB="$(PREFIX)/lib" \
-		./auto/configure --prefix=$(PREFIX) --with-debug --add-module=$(TOPDIR)/module)
+		./configure --prefix=$(PREFIX) --with-debug --add-module=$(TOPDIR)/module)
 
 check: $(PREFIX)/sbin/nginx
 	(cd module; PATH=$(PREFIX)/sbin:$(PATH) prove)
+
+
+reformat:
+	astyle --mode=c \
+               --quiet \
+               --style=1tbs \
+               --indent=spaces=4 \
+               --indent-namespaces \
+               --indent-col1-comments \
+               --max-instatement-indent=78 \
+               --pad-oper \
+               --pad-header \
+               --add-brackets \
+               --unpad-paren \
+               --align-pointer=name \
+               --align-reference=name \
+               $(TOPDIR)/module/src/*.[ch]
