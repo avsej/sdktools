@@ -2,9 +2,9 @@ TOPDIR := $(shell pwd)
 PREFIX := $(TOPDIR)/install
 LCBSOURCE := $(shell find libcouchbase -name "*.[ch]*")
 NGINXSOURCE := $(shell find nginx -name "*.[ch]*")
-NGINXMODULESOURCE := $(shell find module -name "*.[ch]*")
+NGINXMODULESOURCE := $(shell find module srcache echo -name "*.[ch]*")
 
-CPPFLAGS = -O0 -ggdb3
+CPPFLAGS = -O0 -ggdb3 -DDDEBUG
 CFLAGS = ${CPPFLAGS} -Wall -Wextra
 
 all: $(PREFIX)/sbin/nginx
@@ -32,7 +32,8 @@ nginx/objs/nginx: $(PREFIX)/lib/libcouchbase.la nginx/objs/Makefile $(NGINXSOURC
 nginx/objs/Makefile: nginx/configure module/config
 	(cd nginx; CPPFLAGS="$(CPPFLAGS)" CFLAGS="$(CFLAGS)" \
 		LIBCOUCHBASE_INCLUDE="$(PREFIX)/include" LIBCOUCHBASE_LIB="$(PREFIX)/lib" \
-		./configure --prefix=$(PREFIX) --with-debug --add-module=$(TOPDIR)/module)
+		./configure --prefix=$(PREFIX) --with-debug --add-module=$(TOPDIR)/module \
+		--add-module=$(TOPDIR)/srcache --add-module=$(TOPDIR)/echo)
 
 check: $(PREFIX)/sbin/nginx
 	(cd module; PATH=$(PREFIX)/sbin:$(PATH) prove)
