@@ -7,7 +7,7 @@ NGINXMODULESOURCE := $(shell find module srcache echo -name "*.[ch]*")
 DEBUG := 1
 WARNINGS := -Wall -Wextra
 ifeq ($(DEBUG),1)
-	CPPFLAGS = -O0 -ggdb3
+	CPPFLAGS = -O0 -ggdb3 -DDDEBUG=1
 	NGINX_WITH_DEBUG = --with-debug
 else
 	CPPFLAGS = -O2
