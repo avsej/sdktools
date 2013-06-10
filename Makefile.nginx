@@ -16,6 +16,12 @@ CFLAGS = $(CPPFLAGS) $(WARNINGS)
 
 all: $(PREFIX)/sbin/nginx
 
+clean:
+	repo forall -c 'git clean -dfx' && \
+	rm -rf $(PREFIX) && \
+	mkdir -p $(PREFIX)/conf && \
+	cp $(TOPDIR)/module/etc/nginx.conf $(PREFIX)/conf
+
 libcouchbase: $(PREFIX)/lib/libcouchbase.la
 
 $(PREFIX)/lib/libcouchbase.la: libcouchbase/libcouchbase.la
