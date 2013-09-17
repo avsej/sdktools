@@ -1,0 +1,68 @@
+TOPDIR := $(shell pwd)
+PREFIX := $(TOPDIR)/install
+LCBSOURCE := $(shell find libcouchbase -name "*.[ch]*")
+NGINXSOURCE := $(shell find nginx -name "*.[ch]*")
+NGINXMODULESOURCE := $(shell find module srcache echo -name "*.[ch]*")
+
+DEBUG := 1
+WARNINGS := -Wall -Wextra
+ifeq ($(DEBUG),1)
+	CPPFLAGS = -O0 -ggdb3 -DDDEBUG=1
+	NGINX_WITH_DEBUG = --with-debug
+else
+	CPPFLAGS = -O2
+endif
+CFLAGS = $(CPPFLAGS) $(WARNINGS)
+
+all: $(PREFIX)/sbin/nginx
+
+clean:
+	repo forall -c 'git clean -dfx' && \
+	rm -rf $(PREFIX) && \
+	mkdir -p $(PREFIX)/conf && \
+	cp $(TOPDIR)/module/etc/nginx.conf $(PREFIX)/conf
+
+libcouchbase: $(PREFIX)/lib/libcouchbase.la
+
+$(PREFIX)/lib/libcouchbase.la: libcouchbase/libcouchbase.la
+	(cd libcouchbase; $(MAKE) install)
+
+libcouchbase/libcouchbase.la: libcouchbase/Makefile $(LCBSOURCE)
+	(cd libcouchbase; $(MAKE))
+
+libcouchbase/Makefile: libcouchbase/configure
+	(cd libcouchbase; ./configure --prefix=$(PREFIX) --enable-werror --enable-warnings --enable-debug --disable-plugins)
+
+libcouchbase/configure: libcouchbase/configure.ac
+	(cd libcouchbase; ./config/autorun.sh)
+
+$(PREFIX)/sbin/nginx: nginx/objs/nginx
+	(cd nginx; $(MAKE) install)
+
+nginx/objs/nginx: $(PREFIX)/lib/libcouchbase.la nginx/objs/Makefile $(NGINXSOURCE) $(NGINXMODULESOURCE)
+	(cd nginx; CPPFLAGS="$(CPPFLAGS)" CFLAGS="$(CFLAGS)" $(MAKE))
+
+nginx/objs/Makefile: nginx/configure module/config
+	(cd nginx; CPPFLAGS="$(CPPFLAGS)" CFLAGS="$(CFLAGS)" \
+		LIBCOUCHBASE_INCLUDE="$(PREFIX)/include" LIBCOUCHBASE_LIB="$(PREFIX)/lib" \
+		./configure --prefix=$(PREFIX) $(NGINX_WITH_DEBUG) --add-module=$(TOPDIR)/module \
+		--add-module=$(TOPDIR)/srcache --add-module=$(TOPDIR)/echo)
+
+check: $(PREFIX)/sbin/nginx
+	(cd module; PATH=$(PREFIX)/sbin:$(PATH) prove)
+
+reformat:
+	astyle --mode=c \
+               --quiet \
+               --style=1tbs \
+               --indent=spaces=4 \
+               --indent-namespaces \
+               --indent-col1-comments \
+               --max-instatement-indent=78 \
+               --pad-oper \
+               --pad-header \
+               --add-brackets \
+               --unpad-paren \
+               --align-pointer=name \
+               --align-reference=name \
+               $(TOPDIR)/module/src/*.[ch]
